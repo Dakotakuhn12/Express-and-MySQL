@@ -1,12 +1,10 @@
 const express = require("express");
-const db = require("./db");
-
 const app = express();
 const PORT = 3000;
+const db = require("./db");
+const { error } = require("node:console");
 
 app.use(express.json());
-
-//create our first endpoint:
 
 app.get("/api/games", (req, res) => {
   //set a limit, determine start and end values
@@ -37,4 +35,68 @@ app.get("/api/games", (req, res) => {
       res.send(response);
     }
   });
+});
+app.get("/api/games/:id", (req, res) => {
+  const game_id = req.params.id;
+
+  const query = "SELECT * FROM games WHERE game_id = ?";
+
+  db.query(query, [game_id], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "DB error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.json(results);
+  });
+});
+//POST will be used for inserting new records
+app.post(`/api/games`, (req, res) => {
+  const { game_id, name, category, summary } = req.body;
+  const query =
+    "Insert into games(game_id,name,category,summary) values (?,?,?,?)";
+  db.execute(query, [game_id, name, category, summary], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: "Database error" });
+    } else {
+      res.status(201).json({ message: "Game added", id: game_id });
+    }
+  });
+});
+app.put("/api/games/:id", (req, res) => {
+  const { name, category, summary } = req.body;
+  const sql =
+    "Update games set name = ?, category = ?, summary = ? where game_id = ? ";
+  db.execute(sql, [name, category, summary, req.params.id], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: "Database error" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Game not found" });
+    } else {
+      res.json({ message: "Game Updated" });
+    }
+  });
+});
+app.delete("/api/games/:id", (req, res) => {
+  const sql = "delete from games where game_id = ? ";
+  db.execute(sql, [req.params.id], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: "Database error" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Game not found" });
+    } else {
+      res.json({ message: "Game's Gone" });
+    }
+  });
+});
+app.listen(PORT, () => {
+  console.log(`Active on http:localhost:${PORT}`);
+});
+
+app.listen(PORT, () => {
+  console.log(`Active on http:localhost:${PORT}`);
 });

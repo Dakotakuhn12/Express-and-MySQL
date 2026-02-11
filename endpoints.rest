@@ -1,0 +1,20 @@
+GET http://localhost:3000/api/games/0
+###
+POST http://localhost:3000/api/games
+Content-Type: application/json
+
+{"game_id": 0, "name": "Jame's personal version of R65", "category": 0, "summary": "James talks too much so he had to have his own game because Mr. Klins uninstalled the real one."}
+
+###
+PUT http://localhost:3000/api/games/0
+Content-Type: application/json
+
+{
+    "name": "Better than R65",
+    "category": 0,
+    "summary": "CMP loved R65 so much, they made a better one!"
+}
+
+###
+DELETE http://localhost:3000/api/games/0
+Content-Type: application/json
